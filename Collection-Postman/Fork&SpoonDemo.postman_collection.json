@@ -1,0 +1,213 @@
+{
+	"info": {
+		"_postman_id": "20917bbd-84d0-44e6-8879-6b78f4fc49da",
+		"name": "Fork&SpoonDemo",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43162031"
+	},
+	"item": [
+		{
+			"name": "GET requests",
+			"item": [
+				{
+					"name": "Get all Users",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7065/api/Users/get-all-users",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7065",
+							"path": [
+								"api",
+								"Users",
+								"get-all-users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get user by ID",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"UserId\": 1,\r\n  \"Username\": \"updateduser\",\r\n  \"Email\": \"updateduser@example.com\",\r\n  \"Password\": \"newpassword123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7065/api/Users/get-users-by-1",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7065",
+							"path": [
+								"api",
+								"Users",
+								"get-users-by-1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "POST requests",
+			"item": [
+				{
+					"name": "Create user",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"Username\": \"newuser5\",\r\n  \"Email\": \"newuser@example.com\",\r\n  \"Password\": \"password123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7065/api/Users/create-user",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7065",
+							"path": [
+								"api",
+								"Users",
+								"create-user"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "PUT requests",
+			"item": [
+				{
+					"name": "Update user",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"UserId\": 5,\r\n  \"Username\": \"updateduser5\",\r\n  \"Email\": \"updateduser5@example.com\",\r\n  \"Password\": \"newpassword123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7065/api/Users/update-user-by-5",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7065",
+							"path": [
+								"api",
+								"Users",
+								"update-user-by-5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update user by username",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"Kenya_Gerlach\",\r\n  \"email\": \"kenya@example.com\",\r\n  \"password\": \"NewSecurePass2\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7065/api/Users/update-user-by-username",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7065",
+							"path": [
+								"api",
+								"Users",
+								"update-user-by-username"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "DELETE requests",
+			"item": [
+				{
+					"name": "Delete user",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7065/api/Users/delte-user-by-3",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7065",
+							"path": [
+								"api",
+								"Users",
+								"delte-user-by-3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

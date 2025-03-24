@@ -21,14 +21,14 @@ namespace ForkSpoonDemo.Controllers
         }
 
         // GET: api/Favorites
-        [HttpGet]
+        [HttpGet("get-all-favorites")]
         public async Task<ActionResult<IEnumerable<Favorite>>> GetFavorites()
         {
             return await _context.Favorites.ToListAsync();
         }
 
         // GET: api/Favorites/5
-        [HttpGet("{id}")]
+        [HttpGet("get-favorites-by-{id}")]
         public async Task<ActionResult<Favorite>> GetFavorite(int id)
         {
             var favorite = await _context.Favorites.FindAsync(id);
@@ -43,7 +43,7 @@ namespace ForkSpoonDemo.Controllers
 
         // PUT: api/Favorites/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
+        [HttpPut("update-favorites-by-{id}")]
         public async Task<IActionResult> PutFavorite(int id, Favorite favorite)
         {
             if (id != favorite.FavoriteId)
@@ -74,7 +74,7 @@ namespace ForkSpoonDemo.Controllers
 
         // POST: api/Favorites
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
+        [HttpPost("create-a-favorite")]
         public async Task<ActionResult<Favorite>> PostFavorite(Favorite favorite)
         {
             _context.Favorites.Add(favorite);
@@ -84,7 +84,7 @@ namespace ForkSpoonDemo.Controllers
         }
 
         // DELETE: api/Favorites/5
-        [HttpDelete("{id}")]
+        [HttpDelete("delete-favorite-by-{id}")]
         public async Task<IActionResult> DeleteFavorite(int id)
         {
             var favorite = await _context.Favorites.FindAsync(id);
