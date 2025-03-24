@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ForkSpoonDemo.Models;
+using ForkSpoonDemo.DTOs;
+using AutoMapper;
 
 namespace ForkSpoonDemo.Controllers
 {
@@ -15,20 +17,23 @@ namespace ForkSpoonDemo.Controllers
     {
         private readonly ForkSpoonDbContext _context;
 
-        public UsersController(ForkSpoonDbContext context)
+        private readonly IMapper _mapper;
+
+        public UsersController(ForkSpoonDbContext context, IMapper mapper) // Inject IMapper
         {
             _context = context;
+            _mapper = mapper; // Initialize the mapper field
         }
 
         // GET: api/Users
-        [HttpGet]
+        [HttpGet("get-all-users")]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
             return await _context.Users.ToListAsync();
         }
 
         // GET: api/Users/5
-        [HttpGet("{id}")]
+        [HttpGet("get-users-by-{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
             var user = await _context.Users.FindAsync(id);
@@ -43,7 +48,7 @@ namespace ForkSpoonDemo.Controllers
 
         // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
+        [HttpPut("update-user-by-{id}")]
         public async Task<IActionResult> PutUser(int id, User user)
         {
             if (id != user.UserId)
@@ -72,9 +77,35 @@ namespace ForkSpoonDemo.Controllers
             return NoContent();
         }
 
+        [HttpPut("update-user-by-username")]
+        public async Task<IActionResult> UpdateUserByUsername(UpdateUserDto updateUserDto)
+        {
+            // Find the user by username
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == updateUserDto.Username);
+
+            if (user == null)
+            {
+                return NotFound($"User with username '{updateUserDto.Username}' not found.");
+            }
+
+            // Map the updated fields from the DTO to the user entity
+            _mapper.Map(updateUserDto, user);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return StatusCode(500, "An error occurred while updating the user.");
+            }
+
+            return NoContent();
+        }
+
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
+        [HttpPost("create-user")]
         public async Task<ActionResult<User>> PostUser(User user)
         {
             _context.Users.Add(user);
@@ -84,7 +115,7 @@ namespace ForkSpoonDemo.Controllers
         }
 
         // DELETE: api/Users/5
-        [HttpDelete("{id}")]
+        [HttpDelete("delte-user-by-{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
             var user = await _context.Users.FindAsync(id);

@@ -21,14 +21,14 @@ namespace ForkSpoonDemo.Controllers
         }
 
         // GET: api/Recipes
-        [HttpGet]
+        [HttpGet("get-all-recipes")]
         public async Task<ActionResult<IEnumerable<Recipe>>> GetRecipes()
         {
             return await _context.Recipes.ToListAsync();
         }
 
         // GET: api/Recipes/5
-        [HttpGet("{id}")]
+        [HttpGet("get-recipe-by-{id}")]
         public async Task<ActionResult<Recipe>> GetRecipe(int id)
         {
             var recipe = await _context.Recipes.FindAsync(id);
@@ -43,7 +43,7 @@ namespace ForkSpoonDemo.Controllers
 
         // PUT: api/Recipes/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
+        [HttpPut("update-recipe-by-{id}")]
         public async Task<IActionResult> PutRecipe(int id, Recipe recipe)
         {
             if (id != recipe.RecipeId)
@@ -74,7 +74,7 @@ namespace ForkSpoonDemo.Controllers
 
         // POST: api/Recipes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
+        [HttpPost("create-a-recipe")]
         public async Task<ActionResult<Recipe>> PostRecipe(Recipe recipe)
         {
             _context.Recipes.Add(recipe);
@@ -84,7 +84,7 @@ namespace ForkSpoonDemo.Controllers
         }
 
         // DELETE: api/Recipes/5
-        [HttpDelete("{id}")]
+        [HttpDelete("delete-recipe-by-{id}")]
         public async Task<IActionResult> DeleteRecipe(int id)
         {
             var recipe = await _context.Recipes.FindAsync(id);
