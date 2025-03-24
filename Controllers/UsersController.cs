@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using ForkSpoonDemo.Models;
 using ForkSpoonDemo.DTOs;
 using AutoMapper;
+using ForkSpoonDemo.Services;
 
 namespace ForkSpoonDemo.Controllers
 {
@@ -15,124 +16,70 @@ namespace ForkSpoonDemo.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly ForkSpoonDbContext _context;
+        private readonly IUserService _userService;
 
         private readonly IMapper _mapper;
 
-        public UsersController(ForkSpoonDbContext context, IMapper mapper) // Inject IMapper
+        public UsersController(IUserService userService, IMapper mapper) 
         {
-            _context = context;
-            _mapper = mapper; // Initialize the mapper field
+            _userService = userService;
+            _mapper = mapper; 
         }
 
-        // GET: api/Users
-        [HttpGet("get-all-users")]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        // GET: api/users
+        [HttpGet]
+        public async Task<IActionResult> GetAllUsers()
         {
-            return await _context.Users.ToListAsync();
+            var users = await _userService.GetAllUsersAsync();
+            return Ok(users);
         }
 
-        // GET: api/Users/5
-        [HttpGet("get-users-by-{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
+        // GET: api/users/{id}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUserById(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return user;
+            var user = await _userService.GetUserByIdAsync(id);
+            if (user == null) return NotFound();
+            return Ok(user);
         }
 
-        // PUT: api/Users/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("update-user-by-{id}")]
-        public async Task<IActionResult> PutUser(int id, User user)
+        // PUT: api/users/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUserById(int id, User user)
         {
-            if (id != user.UserId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(user).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            var updatedUser = await _userService.UpdateUserAsync(id, user);
+            if (updatedUser == null) return NotFound();
+            return Ok(updatedUser);
         }
 
-        [HttpPut("update-user-by-username")]
+        // PUT: api/users/update-by-username
+        [HttpPut]
         public async Task<IActionResult> UpdateUserByUsername(UpdateUserDto updateUserDto)
         {
-            // Find the user by username
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == updateUserDto.Username);
-
-            if (user == null)
+            var updatedUser = await _userService.UpdateUserByUsernameAsync(updateUserDto.Username, updateUserDto);
+            if (updatedUser == null)
             {
                 return NotFound($"User with username '{updateUserDto.Username}' not found.");
             }
 
-            // Map the updated fields from the DTO to the user entity
-            _mapper.Map(updateUserDto, user);
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                return StatusCode(500, "An error occurred while updating the user.");
-            }
-
-            return NoContent();
+            return Ok(updatedUser);
         }
 
-        // POST: api/Users
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost("create-user")]
-        public async Task<ActionResult<User>> PostUser(User user)
+        // POST: api/users
+        [HttpPost]
+        public async Task<IActionResult> CreateUser(User user)
         {
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetUser", new { id = user.UserId }, user);
+            var createdUser = await _userService.CreateUserAsync(user);
+            return CreatedAtAction(nameof(GetUserById), new { id = createdUser.UserId }, createdUser);
         }
 
-        // DELETE: api/Users/5
-        [HttpDelete("delte-user-by-{id}")]
+        // DELETE: api/users/{id}
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-
+            var result = await _userService.DeleteUserAsync(id);
+            if (!result) return NotFound();
             return NoContent();
-        }
-
-        private bool UserExists(int id)
-        {
-            return _context.Users.Any(e => e.UserId == id);
         }
     }
 }

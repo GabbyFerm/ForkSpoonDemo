@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ForkSpoonDemo.Models;
+using ForkSpoonDemo.DTOs;
+using AutoMapper;
+using ForkSpoonDemo.Services;
 
 namespace ForkSpoonDemo.Controllers
 {
@@ -13,95 +16,57 @@ namespace ForkSpoonDemo.Controllers
     [ApiController]
     public class RecipesController : ControllerBase
     {
-        private readonly ForkSpoonDbContext _context;
+        private readonly IRecipeService _recipeService;
 
-        public RecipesController(ForkSpoonDbContext context)
+        private readonly IMapper _mapper;
+
+        public RecipesController(IRecipeService recipeService, IMapper mapper)
         {
-            _context = context;
+            _recipeService = recipeService;
+            _mapper = mapper;
         }
 
         // GET: api/Recipes
-        [HttpGet("get-all-recipes")]
-        public async Task<ActionResult<IEnumerable<Recipe>>> GetRecipes()
+        [HttpGet]
+        public async Task<IActionResult> GetAllRecipes()
         {
-            return await _context.Recipes.ToListAsync();
+            var recipes = await _recipeService.GetAllRecipesAsync();
+            return Ok(recipes);
         }
 
-        // GET: api/Recipes/5
-        [HttpGet("get-recipe-by-{id}")]
-        public async Task<ActionResult<Recipe>> GetRecipe(int id)
+        // GET: api/Recipes/{id}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetRecipeById(int id)
         {
-            var recipe = await _context.Recipes.FindAsync(id);
-
-            if (recipe == null)
-            {
-                return NotFound();
-            }
-
-            return recipe;
+            var recipe = await _recipeService.GetRecipeByIdAsync(id);
+            if (recipe == null) return NotFound();
+            return Ok(recipe);
         }
 
-        // PUT: api/Recipes/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("update-recipe-by-{id}")]
-        public async Task<IActionResult> PutRecipe(int id, Recipe recipe)
+        // PUT: api/Recipes/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateRecipeById(int id, UpdateRecipeDto updateRecipeDto)
         {
-            if (id != recipe.RecipeId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(recipe).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!RecipeExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            var updatedRecipe = await _recipeService.UpdateRecipeAsync(id, updateRecipeDto);
+            if (updatedRecipe == null) return NotFound();
+            return Ok(updatedRecipe);
         }
 
         // POST: api/Recipes
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost("create-a-recipe")]
-        public async Task<ActionResult<Recipe>> PostRecipe(Recipe recipe)
+        [HttpPost]
+        public async Task<IActionResult> CreateARecipe(Recipe recipe)
         {
-            _context.Recipes.Add(recipe);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetRecipe", new { id = recipe.RecipeId }, recipe);
+            var newRecipe = await _recipeService.CreateRecipeAsync(recipe);
+            return CreatedAtAction(nameof(GetRecipeById), new { id = newRecipe.RecipeId }, newRecipe);
         }
 
-        // DELETE: api/Recipes/5
-        [HttpDelete("delete-recipe-by-{id}")]
+        // DELETE: api/Recipes/{id}
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRecipe(int id)
         {
-            var recipe = await _context.Recipes.FindAsync(id);
-            if (recipe == null)
-            {
-                return NotFound();
-            }
-
-            _context.Recipes.Remove(recipe);
-            await _context.SaveChangesAsync();
-
+            var recipeToDelete = await _recipeService.DeleteRecipeAsync(id);
+            if (!recipeToDelete) return NotFound();
             return NoContent();
-        }
-
-        private bool RecipeExists(int id)
-        {
-            return _context.Recipes.Any(e => e.RecipeId == id);
         }
     }
 }

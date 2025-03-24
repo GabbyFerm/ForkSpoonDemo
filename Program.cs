@@ -1,5 +1,6 @@
 using ForkSpoonDemo.Models;
 using ForkSpoonDemo.Seeders;
+using ForkSpoonDemo.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Configuration;
@@ -16,11 +17,18 @@ namespace ForkSpoonDemo
             builder.Services.AddAutoMapper(typeof(Program));
 
             // Add services to the container.
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IFavoriteService, FavoriteService>();
+            builder.Services.AddScoped<IRecipeService, RecipeService>();
+
             // Register the DbContext with the DI container
             builder.Services.AddDbContext<ForkSpoonDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            builder.Services.AddScoped<UserDataSeeder>(); // Register the seeder
+            // Data seeders for dummy data
+            builder.Services.AddScoped<UserDataSeeder>(); 
+            builder.Services.AddScoped<FavoriteDataSeeder>();
+            builder.Services.AddScoped<RecipeDataSeeder>();
 
             builder.Services.AddControllers();
 
@@ -45,8 +53,22 @@ namespace ForkSpoonDemo
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
-                var seeder = services.GetRequiredService<UserDataSeeder>();
-                await seeder.SeedUsersAsync(20); // Set desired amount here
+                try
+                {
+                    var seeder = services.GetRequiredService<UserDataSeeder>();
+                    await seeder.SeedUsersAsync(50); // Set desired amount here
+
+                    var recipeSeeder = services.GetRequiredService<RecipeDataSeeder>();
+                    await recipeSeeder.SeedRecipesAsync(50); // Seed recipes
+
+                    var favoriteSeeder = services.GetRequiredService<FavoriteDataSeeder>();
+                    await favoriteSeeder.SeedFavoritesAsync(50); // Seed favorites
+                }
+                catch (Exception ex)
+                {
+                    // Log the error (you can use a logging framework)
+                    Console.WriteLine($"An error occurred while seeding the database: {ex.Message}");
+                }
             }
 
             app.Run();

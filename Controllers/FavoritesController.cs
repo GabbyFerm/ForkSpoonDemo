@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ForkSpoonDemo.Models;
+using ForkSpoonDemo.Services;
 
 namespace ForkSpoonDemo.Controllers
 {
@@ -13,95 +14,63 @@ namespace ForkSpoonDemo.Controllers
     [ApiController]
     public class FavoritesController : ControllerBase
     {
-        private readonly ForkSpoonDbContext _context;
+        private readonly IFavoriteService _favoriteService;
 
-        public FavoritesController(ForkSpoonDbContext context)
+        public FavoritesController(IFavoriteService favoriteService)
         {
-            _context = context;
+            _favoriteService = favoriteService;
         }
 
         // GET: api/Favorites
-        [HttpGet("get-all-favorites")]
-        public async Task<ActionResult<IEnumerable<Favorite>>> GetFavorites()
+        [HttpGet]
+        public async Task<IActionResult> GetAllFavorites()
         {
-            return await _context.Favorites.ToListAsync();
+            var favorites = await _favoriteService.GetAllFavoritesAsync();
+            return Ok(favorites);
         }
 
-        // GET: api/Favorites/5
-        [HttpGet("get-favorites-by-{id}")]
-        public async Task<ActionResult<Favorite>> GetFavorite(int id)
+        // GET: api/favorites/{id}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetFavoriteById(int id)
         {
-            var favorite = await _context.Favorites.FindAsync(id);
+            var favorite = await _favoriteService.GetFavoriteByIdAsync(id);
 
             if (favorite == null)
             {
                 return NotFound();
             }
 
-            return favorite;
+            return Ok(favorite);
         }
 
-        // PUT: api/Favorites/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("update-favorites-by-{id}")]
-        public async Task<IActionResult> PutFavorite(int id, Favorite favorite)
+        // POST: api/favorites
+        [HttpPost]
+        public async Task<IActionResult> CreateFavorite(Favorite favorite)
         {
-            if (id != favorite.FavoriteId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(favorite).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!FavoriteExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            var newFavorite = await _favoriteService.CreateFavoriteAsync(favorite);
+            return CreatedAtAction(nameof(GetFavoriteById), new { id = newFavorite.FavoriteId }, newFavorite);
         }
 
-        // POST: api/Favorites
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost("create-a-favorite")]
-        public async Task<ActionResult<Favorite>> PostFavorite(Favorite favorite)
+        // PUT: api/favorites/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateFavoriteById(int id, Favorite favorite)
         {
-            _context.Favorites.Add(favorite);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetFavorite", new { id = favorite.FavoriteId }, favorite);
+            var updatedFavorite = await _favoriteService.UpdateFavoriteAsync(id, favorite);
+            if (updatedFavorite == null) return NotFound();
+            return Ok(updatedFavorite);
         }
 
-        // DELETE: api/Favorites/5
-        [HttpDelete("delete-favorite-by-{id}")]
+        // DELETE: api/favorites/{id}
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFavorite(int id)
         {
-            var favorite = await _context.Favorites.FindAsync(id);
-            if (favorite == null)
+            var result = await _favoriteService.DeleteFavoriteAsync(id);
+            if (!result)
             {
                 return NotFound();
             }
 
-            _context.Favorites.Remove(favorite);
-            await _context.SaveChangesAsync();
-
             return NoContent();
-        }
-
-        private bool FavoriteExists(int id)
-        {
-            return _context.Favorites.Any(e => e.FavoriteId == id);
         }
     }
 }
