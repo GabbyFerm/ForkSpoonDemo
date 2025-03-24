@@ -1,0 +1,6 @@
+@ForkSpoonDemo_HostAddress = http://localhost:5044
+
+GET {{ForkSpoonDemo_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
